@@ -18,6 +18,13 @@ Underlying date object can be accessed via `_date` attribute;
 	>>> d.toString()
 	"Wed Jul 16 2014 14:51:21 GMT+0430 (IRDT)"
 
+Usage
+-----
+jdate.min.js is minified version of calendar.js and jdate-class.js.
+
+	<script src="jdate.min.js"></script>
+
+
 Initializing a JDate object
 -----
 Like original Date class, JDate class can be intialized in various ways.
@@ -77,7 +84,7 @@ Construct with year/month(/day/hour/minute/second/millesecond). NOTE that like `
 	>>> new JDate(1392, 2, 3, 17).toLocaleString()
 	"1393/03/03 17:00:00"
 
-JDate class method
+JDate class methods
 ------
 Like `Date` class `JDate` have these class methods: now, UTC, parse
 
@@ -130,3 +137,4 @@ toUTCString) is also inherited from Date class and represent Gregorian dates.
 	"1391/02/15 17:19:00"
 	>>> j._date.toString()
 	"Fri May 04 2012 17:19:00 GMT+0430 (IRDT)"
+
