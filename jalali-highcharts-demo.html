@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta charset="UTF-8">
+	<script src="//code.jquery.com/jquery-1.9.1.js"></script>
+	<script src="//code.highcharts.com/stock/highstock.js"></script>
+	<script src="//raw.githack.com/tahajahangir/jdate/master/jdate.min.js"></script>
+	<link rel="stylesheet" href="//necolas.github.io/normalize.css/3.0.1/normalize.css">
+	<script>
+		window.ODate = Date;
+		window.Date = JDate;
+	</script>
+	<title>Jalali date for highcharts demo</title>
+</head>
+<body>
+
+<div style="max-width: 1000px; margin: 50px auto">
+	<h1>Jalali date for highcharts demo</h1>
+	<p>
+		This page demonstrates Jalali calendar for Highstock (and Highcharts) with
+		<a href="https://github.com/tahajahangir/jdate">JDate</a> library. This works by replacing
+		<code>window.Date</code> with <code>JDate</code> class.
+	</p>
+	<div id="container"></div>
+	<script>
+		$(function () {
+			Highcharts.setOptions({
+				lang: {
+					months: ['فروردين', 'ارديبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'],
+					shortMonths: ['فروردين', 'ارديبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'],
+					weekdays: ["یکشنبه", "دوشنبه", "سه شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"]
+				}
+			});
+			$.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=aapl-c.json&callback=?', function (data) {
+				// Create the chart
+				$('#container').highcharts('StockChart', {
+					title: {
+						text: 'AAPL Stock Price'
+					},
+
+					series: [
+						{
+							name: 'AAPL',
+							data: data,
+							tooltip: {
+								valueDecimals: 2
+							}
+						}
+					]
+				});
+			});
+
+		});
+	</script>
+	<p>
+		The chart contains several date related features that displayed in Jalali calendar:
+	</p>
+	<ul>
+		<li>X-axis labels</li>
+		<li>X-axis navigator labels</li>
+		<li>Point tooltips</li>
+		<li>YTD zoom option (period from beginning of current jalali year to now)</li>
+		<li>Range selector (viewing and selecting jalali dates)</li>
+	</ul>
+	<div dir="rtl" lang="fa">
+		<h1>تاریخ شمسی برای نمودارهای highcharts</h1>
+		<p>
+			در این صفحه با استفاده از کتابخانه
+			<a href="https://github.com/tahajahangir/jdate">JDate</a>
+			به صورت نمونه یک نمودار highcharts با تاریخ شمسی نشان داده شده است.
+			اصل شمسی کردن تاریخ با جایگزاری کلاس
+			<code>JDate</code>
+			با <code>window.Date</code>
+			(که کلاس اصلی تاریخ جاواسکریپت است) انجام می‌شود.
+		</p>
+		<p>
+			ویژگی‌هایی مختلفی در این نمودار وجود دارند که با تاریخ شمسی سازگار شده اند:
+		</p>
+		<ul>
+			<li>برچسب‌های محور X نمودار</li>
+			<li>برچسب‌های نوار مرور در زیر نمودار</li>
+			<li>تاریخ نوشته شده در توضیحات مربوط به هر نقطه</li>
+			<li>گزینه YTD در انتخاب تاریخ (که بازه اول سال جاری شمسی تا الان را انتخاب می‌کند)</li>
+			<li>ورودی‌های مربوط به انتخاب تاریخ (که تاریخ شمسی را نشان می‌دهند و امکان تغییر تاریخ نیز وجود دارد)</li>
+		</ul>
+	</div>
+</div>
+</body>
+</html>
