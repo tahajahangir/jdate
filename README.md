@@ -144,5 +144,5 @@ Usecase: highcharts
 This `JDate` is compatible with original javascript `Date` class and can bring Jalali calendar support to libraries
 without any knowledge of this calendar.
 
-One sample is highcharts (or highstock): [Jalali date for highcharts demo](https://tahajahangir.github.io/jdate/jalali-highcharts-demo.html)
+One sample is highcharts (or highstock): [Jalali date for highcharts demo](http://tahajahangir.github.io/jdate/jalali-highcharts-demo.html)
 ![Jalali date for highcharts](http://tahajahangir.github.io/jdate/highstock-demo.png)
