@@ -9,7 +9,19 @@ function digits_fa2en(text) {
 function pad2(number) {
 	return number < 10 ? '0' + number: number;
 }
-
+function persian_to_jd_fixed(year, month, day) {
+	/*
+	Fix `persian_to_jd` so we can use negative or large values for month, e.g:
+	persian_to_jd_fixed(1393, 26, 1) == persian_to_jd_fixed(1395, 2, 1)
+	persian_to_jd_fixed(1393, -2, 1) == persian_to_jd_fixed(1392, 10, 1)
+	 */
+	if (month > 12 || month <= 0) {
+		var yearDiff = Math.floor((month - 1) / 12);
+		year += yearDiff;
+		month = month - yearDiff * 12;
+	}
+	return persian_to_jd(year, month, day);
+}
 function parseDate(string, convertToPersian) {
 	/*
 	 http://en.wikipedia.org/wiki/ISO_8601
@@ -60,7 +72,7 @@ function parseDate(string, convertToPersian) {
 		year = day;
 	}
 	if (convertToPersian) {
-		var persian = jd_to_gregorian(persian_to_jd(year, month, day));
+		var persian = jd_to_gregorian(persian_to_jd_fixed(year, month, day));
 		year = persian[0];
 		month = persian[1];
 		day = persian[2];
@@ -93,7 +105,7 @@ function JDate(a, month, day, hour, minute, second, millisecond) {
 	else if (arguments.length == 1) {
 		this._d = new Date((a instanceof JDate)?a._d:a);
 	} else {
-		var persian = jd_to_gregorian(persian_to_jd(a, (month || 0) + 1, day || 1));
+		var persian = jd_to_gregorian(persian_to_jd_fixed(a, (month || 0) + 1, day || 1));
 		this._d = new Date(persian[0], persian[1] - 1, persian[2], hour || 0, minute || 0, second || 0, millisecond || 0);
 	}
 	this['_date'] = this._d;
@@ -121,7 +133,7 @@ JDate.prototype = {
 	_setPersianDate: function (which, value) {
 		var persian = this._persianDate();
 		persian[which] = value;
-		var new_date = jd_to_gregorian(persian_to_jd(persian[0], persian[1], persian[2]));
+		var new_date = jd_to_gregorian(persian_to_jd_fixed(persian[0], persian[1], persian[2]));
 		this._d.setFullYear(new_date[0]);
 		this._d.setMonth(new_date[1] - 1);
 		this._d.setDate(new_date[2]);
@@ -129,7 +141,7 @@ JDate.prototype = {
 	_setUTCPersianDate: function (which, value) {
 		var persian = this._persianUTCDate();
 		persian[which] = value;
-		var new_date = jd_to_gregorian(persian_to_jd(persian[0], persian[1], persian[2]));
+		var new_date = jd_to_gregorian(persian_to_jd_fixed(persian[0], persian[1], persian[2]));
 		this._d.setUTCFullYear(new_date[0]);
 		this._d.setUTCMonth(new_date[1] - 1);
 		this._d.setUTCDate(new_date[2]);
@@ -180,7 +192,7 @@ JDate['parse'] = function (string) {
 	new JDate(string)['getTime']()
 };
 JDate['UTC'] = function (year, month, date, hours, minutes, seconds, milliseconds) {
-	var d = jd_to_gregorian(persian_to_jd(year, month + 1, date || 1));
+	var d = jd_to_gregorian(persian_to_jd_fixed(year, month + 1, date || 1));
 	return Date.UTC(d[0], d[1] - 1, d[2], hours || 0, minutes || 0, seconds || 0, milliseconds || 0);
 };
 var i, dateProps = ('getHours getMilliseconds getMinutes getSeconds getTime getUTCDay getUTCHours ' +
