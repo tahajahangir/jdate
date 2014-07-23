@@ -10,6 +10,12 @@
 		window.ODate = Date;
 		window.Date = JDate;
 	</script>
+	<script>
+		if (location.protocol == 'https:') {
+			// urls on www.highcharts.com are always redirected to http, so we can't query them on https page
+			window.location = 'http' + ('' + location).substr(5);
+		}
+	</script>
 	<title>Jalali date for highcharts demo</title>
 </head>
 <body>
