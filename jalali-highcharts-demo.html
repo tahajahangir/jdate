@@ -30,6 +30,34 @@
 	<div id="container"></div>
 	<script>
 		$(function () {
+			///////////// start: change highcharts digits to persian digits
+			function digits_en2fa (number){
+				return number.toString().replace(/\d/g, function(d){
+					return String.fromCharCode(d.charCodeAt(0) + 1728);
+				});
+			}
+			function pInt(s, mag) {
+				return parseInt(s, mag || 10);
+			}
+			function oldNumberFormat(number, decimals, decPoint, thousandsSep) {
+				var lang = Highcharts.getOptions().lang,
+					// http://kevin.vanzonneveld.net/techblog/article/javascript_equivalent_for_phps_number_format/
+					n = +number || 0,
+					c = decimals === -1 ?
+						(n.toString().split('.')[1] || '').length : // preserve decimals
+						(isNaN(decimals = Math.abs(decimals)) ? 2 : decimals),
+					d = decPoint === undefined ? lang.decimalPoint : decPoint,
+					t = thousandsSep === undefined ? lang.thousandsSep : thousandsSep,
+					s = n < 0 ? "-" : "",
+					i = String(pInt(n = Math.abs(n).toFixed(c))),
+					j = i.length > 3 ? i.length % 3 : 0;
+
+				return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) +
+					(c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+			}
+			Highcharts.numberFormat = function(a,b,c,d){return digits_en2fa(oldNumberFormat(a,b,c,d))};
+			///////////// end: change highcharts digits to persian digits
+
 			Highcharts.setOptions({
 				lang: {
 					months: ['فروردين', 'ارديبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'],
