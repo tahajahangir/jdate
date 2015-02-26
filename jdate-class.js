@@ -78,7 +78,6 @@ function parseDate(string, convertToPersian) {
 		day = persian[2];
 	}
 	var date = new Date(year, month - 1, day, hour, minute, seconds, millis);
-	console.log(date);
 	if (isNonLocal) {
 		date.setUTCMinutes(date.getUTCMinutes() - date.getTimezoneOffset() + tzOffset);
 	}
