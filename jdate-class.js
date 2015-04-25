@@ -200,8 +200,8 @@ var i, dateProps = ('getHours getMilliseconds getMinutes getSeconds getTime getU
 		'toJSON toString toLocaleDateString toLocaleTimeString toTimeString toUTCString valueOf getDay')
 			.split(' '),
 	createWrapper = function (k) {
-		return function (v) {
-			return this._d[k](v)
+		return function () {
+			return this._d[k].apply(this._d, arguments)
 		}
 	};
 
