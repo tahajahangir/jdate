@@ -133,9 +133,9 @@ JDate.prototype = {
 		var persian = this._persianDate();
 		persian[which] = value;
 		var new_date = jd_to_gregorian(persian_to_jd_fixed(persian[0], persian[1], persian[2]));
-		this._d.setFullYear(new_date[0]);
-		this._d.setMonth(new_date[1] - 1);
 		this._d.setDate(new_date[2]);
+		this._d.setMonth(new_date[1] - 1);
+		this._d.setFullYear(new_date[0]);
 	},
 	_setUTCPersianDate: function (which, value) {
 		var persian = this._persianUTCDate();
@@ -170,8 +170,11 @@ JDate.prototype['setDate'] = function (v) {
 JDate.prototype['setFullYear'] = function (v) {
 	this._setPersianDate(0, v)
 };
-JDate.prototype['setMonth'] = function (v) {
-	this._setPersianDate(1, v + 1)
+JDate.prototype['setMonth'] = function (v,d) {
+	this._setPersianDate(1, v + 1);
+	if (d !== undefined) {
+		this._setPersianDate(2, d);
+	}
 };
 JDate.prototype['setUTCDate'] = function (v) {
 	this._setUTCPersianDate(2, v)
