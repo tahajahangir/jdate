@@ -134,16 +134,14 @@ JDate.prototype = {
 		persian[which] = value;
 		var new_date = jd_to_gregorian(persian_to_jd_fixed(persian[0], persian[1], persian[2]));
 		this._d.setFullYear(new_date[0]);
-		this._d.setMonth(new_date[1] - 1);
-		this._d.setDate(new_date[2]);
+		this._d.setMonth(new_date[1] - 1, new_date[2]);
 	},
 	_setUTCPersianDate: function (which, value) {
 		var persian = this._persianUTCDate();
 		persian[which] = value;
 		var new_date = jd_to_gregorian(persian_to_jd_fixed(persian[0], persian[1], persian[2]));
 		this._d.setUTCFullYear(new_date[0]);
-		this._d.setUTCMonth(new_date[1] - 1);
-		this._d.setUTCDate(new_date[2]);
+		this._d.setUTCMonth(new_date[1] - 1, new_date[2]);
 	}
 };
 JDate.prototype['getDate'] = function () {
