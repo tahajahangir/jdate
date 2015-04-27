@@ -129,15 +129,21 @@ JDate.prototype = {
 		}
 		return this._cached_utc_date
 	},
-	_setPersianDate: function (which, value) {
+	_setPersianDate: function (which, value, dayValue) {
 		var persian = this._persianDate();
 		persian[which] = value;
+		if (dayValue !== undefined) {
+			persian[2] = dayValue;
+		}
 		var new_date = jd_to_gregorian(persian_to_jd_fixed(persian[0], persian[1], persian[2]));
 		this._d.setFullYear(new_date[0]);
 		this._d.setMonth(new_date[1] - 1, new_date[2]);
 	},
-	_setUTCPersianDate: function (which, value) {
+	_setUTCPersianDate: function (which, value, dayValue) {
 		var persian = this._persianUTCDate();
+		if (dayValue !== undefined) {
+			persian[2] = dayValue;
+		}
 		persian[which] = value;
 		var new_date = jd_to_gregorian(persian_to_jd_fixed(persian[0], persian[1], persian[2]));
 		this._d.setUTCFullYear(new_date[0]);
@@ -168,8 +174,8 @@ JDate.prototype['setDate'] = function (v) {
 JDate.prototype['setFullYear'] = function (v) {
 	this._setPersianDate(0, v)
 };
-JDate.prototype['setMonth'] = function (v) {
-	this._setPersianDate(1, v + 1)
+JDate.prototype['setMonth'] = function (v, dayValue) {
+	this._setPersianDate(1, v + 1, dayValue)
 };
 JDate.prototype['setUTCDate'] = function (v) {
 	this._setUTCPersianDate(2, v)
@@ -181,8 +187,8 @@ JDate.prototype['toLocaleString'] = function (v) {
 	return this.getFullYear() + '/' + pad2(this.getMonth() + 1) + '/' + pad2(this.getDate()) + ' ' +
 		pad2(this.getHours()) + ':' + pad2(this.getMinutes()) + ':' + pad2(this.getSeconds());
 };
-JDate.prototype['setUTCMonth'] = function (v) {
-	this._setUTCPersianDate(1, v + 1)
+JDate.prototype['setUTCMonth'] = function (v, dayValue) {
+	this._setUTCPersianDate(1, v + 1, dayValue)
 };
 JDate['now'] = Date.now;
 JDate['parse'] = function (string) {
