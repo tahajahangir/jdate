@@ -85,7 +85,8 @@ function parseDate(string, convertToPersian) {
 }
 
 /**
- * @param {Object=} a
+ * @param {Object=} a ,may have different types for different semantics: 1) string: parse a date
+ * 		2) Date object: clone a date object  3) number: value for year
  * @param {Number=} month
  * @param {Number=} day
  * @param {Number=} hour
@@ -115,6 +116,11 @@ function JDate(a, month, day, hour, minute, second, millisecond) {
 }
 
 JDate.prototype = {
+	/**
+	 * returns current Jalali date representation of internal date object, eg. [1394, 12, 5]
+	 * Caches the converted Jalali date for improving performance
+	 * @returns {Array}
+	 */
 	_persianDate: function () {
 		if (this._cached_date_ts != +this._d) {
 			this._cached_date_ts = +this._d;
@@ -122,6 +128,9 @@ JDate.prototype = {
 		}
 		return this._cached_date
 	},
+	/**
+	 * Exactly like `_persianDate` but for UTC value of date
+	 */
 	_persianUTCDate: function () {
 		if (this._cached_utc_date_ts != +this._d) {
 			this._cached_utc_date_ts = +this._d;
@@ -129,6 +138,12 @@ JDate.prototype = {
 		}
 		return this._cached_utc_date
 	},
+	/**
+	 *
+	 * @param which , which component of date to change? 0 for year, 1 for month, 2 for day
+	 * @param value , value of specified component
+	 * @param {Number=} dayValue , change the day along-side specified component, used for setMonth(month[, dayValue])
+	 */
 	_setPersianDate: function (which, value, dayValue) {
 		var persian = this._persianDate();
 		persian[which] = value;
@@ -139,6 +154,9 @@ JDate.prototype = {
 		this._d.setFullYear(new_date[0]);
 		this._d.setMonth(new_date[1] - 1, new_date[2]);
 	},
+	/**
+	 * Exactly like `_setPersianDate`, but operates UTC value
+	 */
 	_setUTCPersianDate: function (which, value, dayValue) {
 		var persian = this._persianUTCDate();
 		if (dayValue !== undefined) {
@@ -150,6 +168,7 @@ JDate.prototype = {
 		this._d.setUTCMonth(new_date[1] - 1, new_date[2]);
 	}
 };
+// All date getter methods
 JDate.prototype['getDate'] = function () {
 	return this._persianDate()[2]
 };
@@ -168,36 +187,52 @@ JDate.prototype['getUTCMonth'] = function () {
 JDate.prototype['getUTCFullYear'] = function () {
 	return this._persianUTCDate()[0]
 };
-JDate.prototype['setDate'] = function (v) {
-	this._setPersianDate(2, v)
+// All date setter methods
+JDate.prototype['setDate'] = function (dayValue) {
+	this._setPersianDate(2, dayValue)
 };
-JDate.prototype['setFullYear'] = function (v) {
-	this._setPersianDate(0, v)
+JDate.prototype['setFullYear'] = function (yearValue) {
+	this._setPersianDate(0, yearValue)
 };
-JDate.prototype['setMonth'] = function (v, dayValue) {
-	this._setPersianDate(1, v + 1, dayValue)
+JDate.prototype['setMonth'] = function (monthValue, dayValue) {
+	this._setPersianDate(1, monthValue + 1, dayValue)
 };
-JDate.prototype['setUTCDate'] = function (v) {
-	this._setUTCPersianDate(2, v)
+JDate.prototype['setUTCDate'] = function (dayValue) {
+	this._setUTCPersianDate(2, dayValue)
 };
-JDate.prototype['setUTCFullYear'] = function (v) {
-	this._setUTCPersianDate(0, v)
+JDate.prototype['setUTCFullYear'] = function (yearValue) {
+	this._setUTCPersianDate(0, yearValue)
 };
-JDate.prototype['toLocaleString'] = function (v) {
+JDate.prototype['setUTCMonth'] = function (monthValue, dayValue) {
+	this._setUTCPersianDate(1, monthValue + 1, dayValue)
+};
+/**
+ * The Date.toLocaleString() method can return a string with a language sensitive representation of this date,
+ * so we change it to return date in Jalali calendar
+ */
+JDate.prototype['toLocaleString'] = function () {
 	return this.getFullYear() + '/' + pad2(this.getMonth() + 1) + '/' + pad2(this.getDate()) + ' ' +
 		pad2(this.getHours()) + ':' + pad2(this.getMinutes()) + ':' + pad2(this.getSeconds());
 };
-JDate.prototype['setUTCMonth'] = function (v, dayValue) {
-	this._setUTCPersianDate(1, v + 1, dayValue)
-};
+/**
+ * The Date.now() method returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC.
+ */
 JDate['now'] = Date.now;
+/**
+ * parses a string representation of a date, and returns the number of milliseconds since January 1, 1970, 00:00:00 UTC.
+ */
 JDate['parse'] = function (string) {
 	new JDate(string)['getTime']()
 };
+/**
+ * The Date.UTC() method accepts the same parameters as the longest form of the constructor, and returns the number of
+ * milliseconds in a Date object since January 1, 1970, 00:00:00, universal time.
+ */
 JDate['UTC'] = function (year, month, date, hours, minutes, seconds, milliseconds) {
 	var d = jd_to_gregorian(persian_to_jd_fixed(year, month + 1, date || 1));
 	return Date.UTC(d[0], d[1] - 1, d[2], hours || 0, minutes || 0, seconds || 0, milliseconds || 0);
 };
+// Proxy all time-related methods to internal date object
 var i, dateProps = ('getHours getMilliseconds getMinutes getSeconds getTime getUTCDay getUTCHours ' +
 		'getTimezoneOffset getUTCMilliseconds getUTCMinutes getUTCSeconds setHours setMilliseconds setMinutes ' +
 		'setSeconds setTime setUTCHours setUTCMilliseconds setUTCMinutes setUTCSeconds toDateString toISOString ' +
@@ -211,4 +246,5 @@ var i, dateProps = ('getHours getMilliseconds getMinutes getSeconds getTime getU
 
 for (i = 0; i < dateProps.length; i++)
 	JDate.prototype[dateProps[i]] = createWrapper(dateProps[i]);
+// Export `JDate` class to global scope
 window['JDate'] = JDate;
