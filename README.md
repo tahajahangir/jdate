@@ -91,7 +91,7 @@ Like `Date` class `JDate` have these class methods: now, UTC, parse
 `JDate.now` returns current time as number, and is exactly same as `Date.now` (It's return value does not depends on
 calendar being used)
 
-`JDate.UTC` can be used to convert jalali dates (in UTC time) to numberic value:
+`JDate.UTC` can be used to convert jalali dates (in UTC time) to numeric value:
 
 	>>> JDate.UTC(1393, 2, 3, 17, 19)
 	1400951940000
