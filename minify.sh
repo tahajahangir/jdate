@@ -1,4 +1,6 @@
 #!/bin/sh
+
+#download latest jar file from: https://mvnrepository.com/artifact/com.google.javascript/closure-compiler/latest
 if [ ! -e compiler.jar ]; then
 	wget http://dl.google.com/closure-compiler/compiler-latest.zip
 	unzip compiler-latest.zip compiler.jar
