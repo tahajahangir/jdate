@@ -1,5 +1,5 @@
 // Cache original `Date` class. User may set window.Date = JDate
-var Date = window['Date'];
+var refDate = window['Date'];
 
 function digits_fa2en(text) {
 	return text.replace(/[۰-۹]/g, function (d) {
@@ -29,18 +29,18 @@ function parseDate(string, convertToPersian) {
 	 https://github.com/arshaw/xdate/blob/master/src/xdate.js#L414
 	 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse
 	 tests:
-	 +parseDate('2014') == +new Date('2014')
-	 +parseDate('2014-2') == +new Date('2014-02')
-	 +parseDate('2014-2-3') == +new Date('2014-02-03')
-	 +parseDate('2014-02-03 12:11') == +new Date('2014/02/03 12:11')
-	 +parseDate('2014-02-03T12:11') == +new Date('2014/02/03 12:11')
+	 +parseDate('2014') == +new refDate('2014')
+	 +parseDate('2014-2') == +new refDate('2014-02')
+	 +parseDate('2014-2-3') == +new refDate('2014-02-03')
+	 +parseDate('2014-02-03 12:11') == +new refDate('2014/02/03 12:11')
+	 +parseDate('2014-02-03T12:11') == +new refDate('2014/02/03 12:11')
 	 parseDate('2014/02/03T12:11') == undefined
-	 +parseDate('2014/02/03 12:11:10.2') == +new Date('2014/02/03 12:11:10') + 200
-	 +parseDate('2014/02/03 12:11:10.02') == +new Date('2014/02/03 12:11:10') + 20
+	 +parseDate('2014/02/03 12:11:10.2') == +new refDate('2014/02/03 12:11:10') + 200
+	 +parseDate('2014/02/03 12:11:10.02') == +new refDate('2014/02/03 12:11:10') + 20
 	 parseDate('2014/02/03 12:11:10Z') == undefined
-	 +parseDate('2014-02-03T12:11:10Z') == +new Date('2014-02-03T12:11:10Z')
-	 +parseDate('2014-02-03T12:11:10+0000') == +new Date('2014-02-03T12:11:10Z')
-	 +parseDate('2014-02-03T10:41:10+0130') == +new Date('2014-02-03T12:11:10Z')
+	 +parseDate('2014-02-03T12:11:10Z') == +new refDate('2014-02-03T12:11:10Z')
+	 +parseDate('2014-02-03T12:11:10+0000') == +new refDate('2014-02-03T12:11:10Z')
+	 +parseDate('2014-02-03T10:41:10+0130') == +new refDate('2014-02-03T12:11:10Z')
 	 */
 	var re = /^(\d|\d\d|\d\d\d\d)(?:([-\/])(\d{1,2})(?:\2(\d|\d\d|\d\d\d\d))?)?(([ T])(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?(Z|([+-])(\d{2})(?::?(\d{2}))?)?)?$/,
 		match = re.exec(string);
@@ -77,13 +77,15 @@ function parseDate(string, convertToPersian) {
 		month = persian[1];
 		day = persian[2];
 	}
-	var date = new Date(year, month - 1, day, hour, minute, seconds, millis);
+	var date = new refDate(year, month - 1, day, hour, minute, seconds, millis);
 	if (isNonLocal) {
 		date.setUTCMinutes(date.getUTCMinutes() - date.getTimezoneOffset() + tzOffset);
 	}
 	return date;
 }
-
+function isNumeric(n) {
+	return !isNaN(parseFloat(n)) && isFinite(n);
+}
 /**
  * @param {Object=} a ,may have different types for different semantics: 1) string: parse a date
  * 		2) Date object: clone a date object  3) number: value for year
@@ -97,16 +99,25 @@ function parseDate(string, convertToPersian) {
  * @extends {Date}
  */
 function JDate(a, month, day, hour, minute, second, millisecond) {
-	if (typeof a == 'string') {
+	if(!isNumeric(a) && (typeof a == 'string')){
 		this._d = parseDate(digits_fa2en(a), true);
 		if (!this._d) throw 'Cannot parse date string'
 	} else if (arguments.length == 0)
-		this._d = new Date();
+		this._d = new refDate();
 	else if (arguments.length == 1) {
-		this._d = new Date((a instanceof JDate)?a._d:a);
+		this._d = new refDate((a instanceof JDate)?a._d:a);
 	} else {
-		var persian = jd_to_gregorian(persian_to_jd_fixed(a, (month || 0) + 1, day || 1));
-		this._d = new Date(persian[0], persian[1] - 1, persian[2], hour || 0, minute || 0, second || 0, millisecond || 0);
+
+		if (typeof a == 'string') a = Number(a);
+		if (typeof month == 'string') month = Number(month);
+		if (typeof day == 'string') day = Number(day);
+		if (typeof hour == 'string') hour = Number(hour);
+		if (typeof minute == 'string') minute = Number(minute);
+		if (typeof second == 'string') second = Number(second);
+		if (typeof millisecond == 'string') millisecond = Number(millisecond);
+
+		var persian = jd_to_gregorian(persian_to_jd_fixed(a, (month || 0) + 1,  (typeof(day) !== "undefined" && day !== null)? day:1));
+		this._d = new refDate(persian[0], persian[1] - 1, persian[2], hour || 0, minute || 0, second || 0, millisecond || 0);
 	}
 	this['_date'] = this._d;
 	this._cached_date_ts = null;
@@ -207,7 +218,7 @@ JDate.prototype['setUTCMonth'] = function (monthValue, dayValue) {
 	this._setUTCPersianDate(1, monthValue + 1, dayValue)
 };
 /**
- * The Date.toLocaleString() method can return a string with a language sensitive representation of this date,
+ * The refDate.toLocaleString() method can return a string with a language sensitive representation of this date,
  * so we change it to return date in Jalali calendar
  */
 JDate.prototype['toLocaleString'] = function () {
@@ -215,9 +226,9 @@ JDate.prototype['toLocaleString'] = function () {
 		pad2(this.getHours()) + ':' + pad2(this.getMinutes()) + ':' + pad2(this.getSeconds());
 };
 /**
- * The Date.now() method returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC.
+ * The refDate.now() method returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC.
  */
-JDate['now'] = Date.now;
+JDate['now'] = refDate.now;
 /**
  * parses a string representation of a date, and returns the number of milliseconds since January 1, 1970, 00:00:00 UTC.
  */
@@ -225,25 +236,25 @@ JDate['parse'] = function (string) {
 	new JDate(string)['getTime']()
 };
 /**
- * The Date.UTC() method accepts the same parameters as the longest form of the constructor, and returns the number of
+ * The refDate.UTC() method accepts the same parameters as the longest form of the constructor, and returns the number of
  * milliseconds in a Date object since January 1, 1970, 00:00:00, universal time.
  */
 JDate['UTC'] = function (year, month, date, hours, minutes, seconds, milliseconds) {
 	var d = jd_to_gregorian(persian_to_jd_fixed(year, month + 1, date || 1));
-	return Date.UTC(d[0], d[1] - 1, d[2], hours || 0, minutes || 0, seconds || 0, milliseconds || 0);
+	return refDate.UTC(d[0], d[1] - 1, d[2], hours || 0, minutes || 0, seconds || 0, milliseconds || 0);
 };
+
 // Proxy all time-related methods to internal date object
 var i, dateProps = ('getHours getMilliseconds getMinutes getSeconds getTime getUTCDay getUTCHours ' +
 		'getTimezoneOffset getUTCMilliseconds getUTCMinutes getUTCSeconds setHours setMilliseconds setMinutes ' +
 		'setSeconds setTime setUTCHours setUTCMilliseconds setUTCMinutes setUTCSeconds toDateString toISOString ' +
 		'toJSON toString toLocaleDateString toLocaleTimeString toTimeString toUTCString valueOf getDay')
-			.split(' '),
-	createWrapper = function (k) {
-		return function () {
-			return this._d[k].apply(this._d, arguments)
-		}
-	};
-
+			.split(' ');
+createWrapper = function (k) {
+	return function () {
+	 	return this._d[k].apply(this._d, arguments)
+	}
+};
 for (i = 0; i < dateProps.length; i++)
 	JDate.prototype[dateProps[i]] = createWrapper(dateProps[i]);
 // Export `JDate` class to global scope
